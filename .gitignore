@@ -1,4 +1,19 @@
-.venv
-__pycache__
-.pytest_cache
-.mypy_cache
+# 1. Entorno Virtual
+# No queremos subir las librerías instaladas, solo la lista en requirements.txt
+.venv/
+venv/
+env/
+
+# 2. Archivos de Secretos
+# ¡NUNCA SUBIR SECRETOS! Crítico para la seguridad.
+.env
+
+# 3. Caché de Python y Herramientas
+# Archivos autogenerados y temporales que no aportan nada al código fuente.
+__pycache__/
+.pytest_cache/
+
+# 4. Archivos de configuración de IDEs (Buena práctica)
+# Evita subir configuraciones personales de tu editor de código.
+.vscode/
+.idea/
