@@ -5,6 +5,10 @@ format:
 	flake8
 	mypy api/ core/ db/ models/ services/ tests/  
 
+.PHONY:
+run:
+	uvicorn main:app --reload
+
 .PHONY: dev
 dev:
 	fastapi dev main.py
