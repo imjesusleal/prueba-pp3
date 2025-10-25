@@ -1,0 +1,14 @@
+from sqlmodel import SQLModel, Field
+from datetime import datetime
+from typing import Optional
+
+class Reviews(SQLModel, table=True):
+    __tablename__ = "reviews"
+    
+    id_review: int = Field(primary_key=True)
+    id_medico: int = Field(foreign_key="medicos.id_medico")
+    id_paciente: int = Field(foreign_key="pacientes.id_paciente")
+    calificacion: int = Field()
+    comentario: Optional[str] = Field(default=None)
+    created_at: Optional[datetime] = Field(default=None)
+    modified_at: Optional[datetime] = Field(default=None)

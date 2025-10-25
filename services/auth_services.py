@@ -6,25 +6,18 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional
 import os
-#lógica de negocio
-from repository.medify_repositories import (
-    get_user_by_username, 
-    get_user_by_email
-)
-from models.medify_models import Users
+
+
+from repository.users import get_user_by_username
+from db.entities.users import Users
 from db.db import get_db
 
 # Configuración de seguridad
-SECRET_KEY = os.getenv("SECRET_KEY", "dbae28de74ae9ff9ee92db82b92774ab6beeb5cb9cb96903e1e6d7a67fe19bd4")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-# pwd_context = CryptContext(
-#     schemes=["argon2"], 
-#     deprecated="auto",
-#     bcrypt__rounds=10,
-#     bcrypt__ident="2b"
-# )
+
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login/form")
 
