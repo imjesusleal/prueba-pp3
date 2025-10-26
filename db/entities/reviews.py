@@ -7,7 +7,7 @@ class Reviews(SQLModel, table=True):
     
     id_review: int = Field(primary_key=True)
     id_medico: int = Field(foreign_key="medicos.id_medico")
-    id_paciente: int = Field(foreign_key="pacientes.id_paciente")
+    id_paciente: int = Field(foreign_key="pacientes.id_pacientes")
     calificacion: int = Field()
     comentario: Optional[str] = Field(default=None)
     created_at: Optional[datetime] = Field(default=None)

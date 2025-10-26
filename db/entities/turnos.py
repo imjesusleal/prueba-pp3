@@ -7,7 +7,7 @@ class Turnos(SQLModel, table=True):
     
     id_turno: Optional[int] = Field(default=None, primary_key=True)
     id_medico: int = Field(foreign_key="medicos.id_medico")
-    id_paciente: int = Field(foreign_key="pacientes.id_paciente")
+    id_paciente: int = Field(foreign_key="pacientes.id_pacientes")
     hora_entrada: datetime = Field()
     hora_salida: datetime = Field()
     completado_exitosamente: bool = Field()
