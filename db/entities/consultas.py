@@ -1,13 +1,36 @@
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlmodel import SQLModel, Field
 from datetime import datetime
-from typing import Optional
 
-class Consultas(SQLModel, table=True):
+
+class Consulta(SQLModel, table=True):
     __tablename__ = "consultas"
-    
-    id_consulta: Optional[int] = Field(default=None, primary_key=True)
-    id_turno: int = Field(unique=True, foreign_key="turnos.id_turno")
-    diagnostico: Optional[str] = Field(default=None)
-    descripcion: Optional[str] = Field(default=None)
-    created_at: Optional[datetime] = Field(default=None)
-    modified_at: Optional[datetime] = Field(default=None)
+
+    id_consulta: int | None = Field(
+        default=None,
+        sa_column=Column(Integer, primary_key=True)
+    )
+
+    id_turno: int = Field(
+        sa_column=Column(Integer, ForeignKey("turnos.id_turno"), unique=True, nullable=False)
+    )
+
+    diagnostico: str | None = Field(
+        default=None,
+        sa_column=Column(String, nullable=True)
+    )
+
+    descripcion: str | None = Field(
+        default=None,
+        sa_column=Column(String, nullable=True)
+    )
+
+    created_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime, nullable=True)
+    )
+
+    modified_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime, nullable=True)
+    )

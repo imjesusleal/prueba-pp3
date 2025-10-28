@@ -2,7 +2,6 @@ from sqlmodel import SQLModel, Field
 from datetime import datetime
 from typing import Optional
 
-
 class Users(SQLModel, table=True):
     __tablename__= "users"
 

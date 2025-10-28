@@ -5,11 +5,11 @@ from typing import Optional
 class Turnos(SQLModel, table=True):
     __tablename__ = "turnos"
     
-    id_turno: Optional[int] = Field(default=None, primary_key=True)
+    id_turno: int = Field(default=None, primary_key=True)
     id_medico: int = Field(foreign_key="medicos.id_medico")
     id_paciente: int = Field(foreign_key="pacientes.id_pacientes")
     hora_entrada: datetime = Field()
     hora_salida: datetime = Field()
     completado_exitosamente: bool = Field()
-    created_at: Optional[datetime] = Field(default=None)
-    modified_at: Optional[datetime] = Field(default=None)
+    created_at: datetime | None = Field(default=None)
+    modified_at: datetime | None = Field(default=None)
