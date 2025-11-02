@@ -12,8 +12,7 @@ class Consulta(SQLModel, table=True):
     )
 
     id_turno: int = Field(
-        sa_column=Column(Integer, ForeignKey("turnos.id_turno"), unique=True, nullable=False)
-    )
+        sa_column=Column(Integer, ForeignKey("turnos.id_turno", ondelete="Cascade"), unique=True, nullable=False))
 
     diagnostico: str | None = Field(
         default=None,

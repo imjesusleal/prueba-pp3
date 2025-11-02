@@ -7,9 +7,6 @@ from db.entities.refresh_token import RefreshToken
 from typing import Optional
 
 from errors.refresh_token.refresh_token_created_error import RefreshTokenCreatedError
-from errors.refresh_token.refresh_token_invalid import RefreshTokenInvalidError
-from models.auth_models.refresh_model import RefreshModel
-
 
 class RefreshTokenRepo:
 
@@ -26,7 +23,7 @@ class RefreshTokenRepo:
             await db.refresh(refresh_token)
             return refresh_token
         except Exception as ex:
-            raise RefreshTokenCreatedError(f"No se pudo crear el token de refrescamiento por esta razón: {ex}")
+            raise RefreshTokenCreatedError(f"No se pudo crear el token de refrescamiento por esta razón: {ex}", 404)
         
     async def set_token_as_invalid(self, refresh_token: RefreshToken, db: AsyncSession = Depends(get_db)) -> None:
         query = select(RefreshToken).filter((RefreshToken.id_user == refresh_token.id_user) & (RefreshToken.refresh_token == refresh_token.refresh_token))

@@ -1,9 +1,12 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI
-from api.auth import auth_router
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from errors.ierror_interface import IError 
+
+from api.auth import auth_router
+from api.profiles import router as profiles_router
 
 try: 
     
@@ -32,7 +35,15 @@ try:
         allow_credentials=True
     )
 
+    @app.exception_handler(IError)
+    async def ierror_exception_handler(request: Request, exc: IError):
+        return JSONResponse(
+        status_code=exc.http_code,
+        content={"detail": exc.msg}
+    )
+
     # Routers
     app.include_router(auth_router.router, prefix="/api/v1")
+    app.include_router(profiles_router.router, prefix="/api/v1")
 except IError as ex:
-    Exception(f"VOY A LOGEAR EN UN ARCHIVO EN ALGUN MOMENTO, TODAVIA NO PERO SE PINCHO LA APP POR ESTO: {ex.with_traceback()}")
+    raise Exception(status_code=ex.http_code,detail= f"{ex.msg}")

@@ -1,6 +1,13 @@
-from sqlmodel import SQLModel, Field
+from ast import List
+from sqlmodel import Relationship, SQLModel, Field
 from datetime import datetime
 from typing import Optional
+# from sqlalchemy.orm import relationship, Mapped
+from typing import ClassVar
+
+from db.entities.medicos import Medicos
+from services.profiles.medicos.commands.add_medico_command import AddMedicoCommand
+
 
 class Users(SQLModel, table=True):
     __tablename__= "users"
@@ -12,3 +19,21 @@ class Users(SQLModel, table=True):
     user_rol: Optional[int] = Field(default=None, foreign_key="users_roles.id_users_roles")
     created_at: Optional[datetime] = Field(default=None)
     modified_at: Optional[datetime] = Field(default=None)
+
+    medico:Medicos = Relationship(back_populates="user", sa_relationship_kwargs={"uselist": False})
+
+    def create_medico(self, cmd: AddMedicoCommand): 
+        self.medico = Medicos(
+            id_user=cmd.id_user,
+            especialidad=cmd.especialidad,
+            documento_identificacion=cmd.documento_identificativo,
+            telefono=cmd.telefono,
+            matricula=cmd.matricula,
+            create_at=datetime.now(),
+            modified_at=datetime.now(),
+            nombre=cmd.nombre,
+            apellido=cmd.apellido
+            )
+        
+    def delete_medico(self):
+        self.medico = None

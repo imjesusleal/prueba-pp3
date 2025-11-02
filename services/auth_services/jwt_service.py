@@ -1,11 +1,12 @@
 import uuid
-from jose import jwt
+from fastapi.security import OAuth2PasswordBearer
+from jose import ExpiredSignatureError, JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional
 import os
 from db.db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 
 from db.entities.refresh_token import RefreshToken
 from db.entities.users import Users
@@ -20,18 +21,33 @@ class JwtService:
     __SECRET_KEY = os.getenv("SECRET_KEY")
     __ALGORITHM = "HS256"
     __ACCESS_TOKEN_EXPIRE_MINUTES = 60
+    __AUTH_SCHEME = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
     def __init__(self):
         self.__refresh_token_repo = RefreshTokenRepo()
         self.__user_repo = UserRepository()
 
 
+    async def get_current_user(self, token: str = Depends(__AUTH_SCHEME)): 
+        try:
+            payload = jwt.decode(token, self.__SECRET_KEY,self.__ALGORITHM)
+            user_id: int = payload.get("id_user")
+
+            if user_id is None:
+                raise HTTPException(status_code=401, detail="Token inválido")
+            
+            return {"id_user": user_id}  
+        except ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="Token expirado")
+        except JWTError:
+            raise HTTPException(status_code=401, detail="Token inválido")
+
     async def create_access_token(self, user: Users, db: AsyncSession = Depends(get_db), expires_delta: Optional[timedelta] = None) -> UserResponse:
         """
             Genera el token JWT que se le entrega a cada usuario con login exitoso
         """
         to_encode = {"sub": user.username, "id_user": user.id_user}
-        expire = datetime.now() + (expires_delta or timedelta(minutes=self.__ACCESS_TOKEN_EXPIRE_MINUTES))
+        expire = datetime.utcnow() + (expires_delta or timedelta(minutes=self.__ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({"exp": expire})
         jsonToken = jwt.encode(to_encode, self.__SECRET_KEY, algorithm=self.__ALGORITHM)
 
@@ -45,7 +61,7 @@ class JwtService:
         user = await self.__user_repo.get_user_by_id(refresh_model.id_user, db)
 
         if user is None:
-            raise UserNotFoundError("El usuario informado no ha sido encontrado. ")
+            raise UserNotFoundError("El usuario informado no ha sido encontrado. ", 400)
 
         return await self.create_access_token(user, db)
     
@@ -72,3 +88,4 @@ class JwtService:
 
         return last_refresh_token.access_token
         
+jwt_service = JwtService()
