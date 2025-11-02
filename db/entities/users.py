@@ -9,6 +9,6 @@ class Users(SQLModel, table=True):
     username: str = Field(max_length=100, unique=True)
     password: str = Field(max_length=255)
     email: str = Field(max_length=255, unique=True)
-    user_rol: Optional[int] = Field(default=None, foreign_key="users.id_user")
+    user_rol: Optional[int] = Field(default=None, foreign_key="users_roles.id_users_roles")
     created_at: Optional[datetime] = Field(default=None)
     modified_at: Optional[datetime] = Field(default=None)

@@ -1,3 +1,5 @@
+MSG ?= Migracion generada
+
 .PHONY: format
 format:
 	black .
@@ -8,6 +10,14 @@ format:
 .PHONY:
 run:
 	uvicorn main:app --reload
+
+.PHONY:
+migration: 
+	alembic revision --autogenerate -m $"{MSG}"
+
+.PHONY: 
+db_update:
+	alembic upgrade head
 
 .PHONY: dev
 dev:

@@ -1,38 +1,33 @@
+from datetime import datetime
 from fastapi import HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from typing import Optional
-import os
 
+from db.entities.refresh_token import RefreshToken
+from errors.refresh_token.refresh_token_invalid import RefreshTokenInvalidError
+from models.auth_models.refresh_model import RefreshModel
+from models.auth_models.token_response import UserResponse
 from models.auth_models.user_login import UserLogin
 from models.auth_models.user_register import UserRegister
+from repository.refresh_token import RefreshTokenRepo
 from repository.user_roles import UsersRolesRepository
 from repository.users import UserRepository
 from db.entities.users import Users
 from db.db import get_db
+from services.auth_services.jwt_service import JwtService
 
 class AuthServices: 
 
     def __init__(self):
         self.__roles_repository = UsersRolesRepository()
         self.__user_repository = UserRepository()
-
-    # Configuración de seguridad
-    __SECRET_KEY = os.getenv("SECRET_KEY")
-    __ALGORITHM = "HS256"
-    __ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
+        self.__refresh_token_repo: RefreshTokenRepo = RefreshTokenRepo()
+        self.__jwt_service: JwtService = JwtService()
 
     __pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-    __oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login/form")
 
-    # =======Servicios principales
     async def register_user(self, user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         try:
-            # Verificaciones existentes...
         
             existeRol: bool = await self.__roles_repository.get_user_role(user_data.user_rol, db)
 
@@ -70,7 +65,7 @@ class AuthServices:
             print(f"Error en register: {e}")  # Ver en terminal
             raise HTTPException(status_code=500, detail=str(e))
 
-    async def authenticate_user(self, credentials: UserLogin, db: AsyncSession):
+    async def authenticate_user(self, credentials: UserLogin, db: AsyncSession = Depends(get_db)) -> UserResponse:
         """Autenticar usuario y generar token"""
         # Buscar usuario
         user = await self.__user_repository.get_user(credentials, db)
@@ -90,30 +85,27 @@ class AuthServices:
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # Crear token
-        access_token = self.__create_access_token(
-            data={"sub": user.username, "id_user": user.id_user}
-        )
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "id_user": user.id_user,
-            "username": user.username
-        }
 
-        #Esta función va para el endpoint de registro de usuario y guarda la contraseña ya hasheada
+        await self.__jwt_service.set_all_tokens_as_invalid(user.id_user, db)
+
+        return await self.__jwt_service.create_access_token(user, db)
+
+
+    async def reauthenticate_user(self, refresh_model: RefreshModel, db: AsyncSession = Depends(get_db)) -> UserResponse:
+        refresh_token: RefreshToken | None =  await self.__refresh_token_repo.get_active_refresh_token(refresh_model.id_user, db)
+
+        if (refresh_token is not None and refresh_token.refresh_token != refresh_model.refresh_token):
+            raise RefreshTokenInvalidError(f"El token enviado no corresponde al último válidado por el sistema.")
+        
+        return await self.__jwt_service.create_if_reathenticate(refresh_model, db)
+        
+
+
     def __hash_password(self,password: str) -> str:
         """Hashear password"""
         return self.__pwd_context.hash(password)
 
-    def __verify_password(self,plain_password: str, hashed_password: str) -> bool:#compara la contraseña del usuario con la hash guardado
+    def __verify_password(self,plain_password: str, hashed_password: str) -> bool:
         """Verificar password"""
         return self.__pwd_context.verify(plain_password, hashed_password)
 
-    def __create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):#genera el token JWT que se le entrega a cada usuario con login exitoso
-        """Crear token JWT"""
-        to_encode = data.copy()
-        expire = datetime.now() + (expires_delta or timedelta(minutes=self.__ACCESS_TOKEN_EXPIRE_MINUTES))
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, self.__SECRET_KEY, algorithm=self.__ALGORITHM)

@@ -2,7 +2,7 @@ from sqlmodel import SQLModel, Field
 from datetime import datetime
 from typing import Optional
 
-class UserRoles(SQLModel, table=True):
+class UsersRoles(SQLModel, table=True):
     __tablename__ = "users_roles"
     
     id_users_roles: int = Field(default=None, primary_key=True)

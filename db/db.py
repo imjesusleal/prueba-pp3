@@ -12,7 +12,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 class DbCtx(): 
     def __init__(self):
         self.__database_url = DATABASE_URL
-        self.engine = create_async_engine(self.__database_url, echo=True)
+        self.engine = create_async_engine(self.__database_url, echo=True, connect_args = {"driver": "ODBC Driver 17 for SQL Server"})
         self._sessionmaker = sessionmaker(bind=self.engine, class_=AsyncSession, expire_on_commit=False)
 
     @asynccontextmanager

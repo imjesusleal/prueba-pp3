@@ -19,3 +19,12 @@ class UserRepository:
         query = select(Users).filter(Users.email == email)
         res = await db.execute(query)
         return res.scalars().first()
+    
+    async def get_user_by_id(self,  user_id: int, db: AsyncSession = Depends(get_db)) -> Optional[Users]:
+        """
+            Busca el user por id para refrescar el token
+        """
+        query = select(Users).filter(Users.id_user == user_id)
+        res = await db.execute(query)
+        db_user = res.scalars().first()
+        return db_user

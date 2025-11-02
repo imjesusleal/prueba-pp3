@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from api.auth import auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
+from errors.ierror_interface import IError 
+
 try: 
     
     load_dotenv()
@@ -25,12 +27,12 @@ try:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        allow_credentials=True
     )
 
     # Routers
     app.include_router(auth_router.router, prefix="/api/v1")
-except Exception as ex:
+except IError as ex:
     Exception(f"VOY A LOGEAR EN UN ARCHIVO EN ALGUN MOMENTO, TODAVIA NO PERO SE PINCHO LA APP POR ESTO: {ex.with_traceback()}")
