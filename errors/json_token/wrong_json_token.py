@@ -1,0 +1,2 @@
+class WrongJsonToken(IOError):
+    pass

@@ -11,5 +11,6 @@ from .entities.refresh_token import RefreshToken
 
 Users.model_rebuild()
 Medicos.model_rebuild()
+Pacientes.model_rebuild()
 
 __all__ = ['get_db', 'Consulta']

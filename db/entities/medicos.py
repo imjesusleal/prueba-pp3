@@ -3,6 +3,7 @@ from sqlmodel import Relationship, SQLModel, Field
 from datetime import datetime
 
 from models.profiles.medifco_profile import MedicoProfile
+from services.profiles.medicos.commands.updt_medico_command import UpdtMedicoCommand
 # from sqlalchemy.orm import relationship
 
 if TYPE_CHECKING:
@@ -21,11 +22,17 @@ class Medicos(SQLModel, table=True):
     create_at: datetime | None = Field(default=None)
     modified_at: datetime | None = Field(default=None)
     telefono: str | None = Field(default=None)
+    img_name: str = Field(default=None, nullable=True)
 
     user: "Users"  = Relationship(back_populates="medico", sa_relationship_kwargs={"uselist": False})
 
 
-    def map_to_model(self) -> MedicoProfile:
+    def update_self(self, cmd: UpdtMedicoCommand):
+        self.matricula = cmd.matricula
+        self.telefono = cmd.telefono
+        self.modified_at = datetime.now()
+
+    def map_to_model(self, pdf_bytes: str = None) -> MedicoProfile:
         return MedicoProfile(
             nombre= self.nombre,
             apellido = self.apellido,
@@ -34,5 +41,6 @@ class Medicos(SQLModel, table=True):
             documento_identificativo=self.documento_identificacion,
             especialidad=self.especialidad,
             matricula=self.matricula,
-            telefono=self.telefono
+            telefono=self.telefono,
+            img_bytes=pdf_bytes
             )

@@ -6,6 +6,7 @@ from typing import Optional
 from typing import ClassVar
 
 from db.entities.medicos import Medicos
+from db.entities.pacientes import Pacientes
 from services.profiles.medicos.commands.add_medico_command import AddMedicoCommand
 
 
@@ -21,6 +22,7 @@ class Users(SQLModel, table=True):
     modified_at: Optional[datetime] = Field(default=None)
 
     medico:Medicos = Relationship(back_populates="user", sa_relationship_kwargs={"uselist": False})
+    paciente: Pacientes = Relationship(back_populates="user",  sa_relationship_kwargs={"uselist": False})
 
     def create_medico(self, cmd: AddMedicoCommand): 
         self.medico = Medicos(

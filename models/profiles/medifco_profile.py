@@ -7,6 +7,7 @@ class MedicoProfile(BaseModel):
     documento_identificativo: int
     especialidad: int
     matricula: str
-    telefono: str
+    telefono: str | None
     nombre: str
     apellido: str
+    img_bytes: str | None

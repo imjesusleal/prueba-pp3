@@ -5,8 +5,9 @@ from fastapi.responses import JSONResponse
 
 from errors.ierror_interface import IError 
 
-from api.auth import auth_router
-from api.profiles import router as profiles_router
+from api.auth.auth import auth_router
+from api.profiles.medicos import router as profiles_router
+from api.uploads.upload import router as upload_router
 
 try: 
     
@@ -43,6 +44,7 @@ try:
     )
 
     # Routers
+    app.include_router(upload_router.router, prefix="/api/v1")
     app.include_router(auth_router.router, prefix="/api/v1")
     app.include_router(profiles_router.router, prefix="/api/v1")
 except IError as ex:

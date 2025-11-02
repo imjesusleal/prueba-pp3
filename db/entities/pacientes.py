@@ -1,7 +1,10 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import Relationship, SQLModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
+
+if TYPE_CHECKING:
+    from users import Users
 
 class Pacientes(SQLModel, table=True):
     __tablename__ = "pacientes"
@@ -13,3 +16,6 @@ class Pacientes(SQLModel, table=True):
     apellido: str = Field(max_length=50)
     create_at: datetime | None = Field(default=None)
     modified_at: datetime | None = Field(default=None)
+    img_name: str = Field(default=None, nullable=True)
+
+    user: "Users"  = Relationship(back_populates="paciente", sa_relationship_kwargs={"uselist": False})

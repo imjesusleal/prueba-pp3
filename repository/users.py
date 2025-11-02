@@ -8,6 +8,7 @@ from typing import Optional
 from sqlalchemy.orm import selectinload, joinedload
 
 from models.auth_models.user_login import UserLogin
+from services.profiles.enums.profiles_enums import ProfilesEnum
 
 class UserRepository:
 
@@ -31,8 +32,27 @@ class UserRepository:
         db_user = res.scalars().first()
         return db_user
     
+    async def get_user_with_profile(self, user_id: int, db: AsyncSession = Depends(get_db)):
+        query = select(Users).filter(Users.id_user == user_id)
+
+        res = await db.execute(query)
+        user: Users = res.scalars().first()
+
+        if not user:
+            return None
+        
+        if user.user_rol == ProfilesEnum.M.value:
+            query = select(Users).filter(Users.id_user == user_id).options(selectinload(Users.medico))
+        elif user.user_rol == ProfilesEnum.P.value:
+            query = select(Users).filter(Users.id_user == user_id).options(selectinload(Users.paciente))
+
+    
+        res = await db.execute(query)
+        return res.scalars().first()
+    
     async def get_user_with_medico_profile(self, user_id: int, db: AsyncSession = Depends(get_db)):
         query = select(Users).filter(Users.id_user == user_id).options(joinedload(Users.medico))
         res = await db.execute(query)
         return res.scalars().first()
+    
     

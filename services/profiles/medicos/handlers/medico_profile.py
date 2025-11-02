@@ -13,12 +13,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.profiles.enums.profiles_enums import ProfilesEnum
 from services.profiles.medicos.commands.add_medico_command import AddMedicoCommand
 from services.profiles.medicos.commands.delete_medico_cmd import DeleteMedicoCmd
+from services.profiles.medicos.commands.updt_medico_command import UpdtMedicoCommand
+from services.uploads.upload_handler import UploadHandler
 
 
 class MedicoProfileHandler:
     def __init__(self):
         self.__user_repo = UserRepository()
         self.__medico_repo = MedicosRepo()
+        self.__upload_handler = UploadHandler()
 
     async def get_user_medico(self, id_user:int, db: AsyncSession = Depends(get_db)) -> MedicoProfile: 
         user: Users = await self.__user_repo.get_user_with_medico_profile(id_user, db)
@@ -29,7 +32,10 @@ class MedicoProfileHandler:
         if user.medico == None:
             raise MedicoNotFound("El usuario enviado no posee un perfil de médico generado. ", 404)
         
-        return user.medico.map_to_model()
+        if user.medico.img_name:
+            pdf_bytes = self.__upload_handler.pdf_to_bytes_base64(user.medico.img_name)
+
+        return user.medico.map_to_model(pdf_bytes)
 
     async def create_medico(self, cmd: AddMedicoCommand, db: AsyncSession = Depends(get_db)): 
         user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user, db)
@@ -47,6 +53,23 @@ class MedicoProfileHandler:
         user.create_medico(cmd)
 
         await db.commit()
+
+    async def update_perfil_medico(self,user_id:int, cmd: UpdtMedicoCommand, db: AsyncSession = Depends(get_db)):
+        user: Users = await self.__user_repo.get_user_with_medico_profile(user_id, db)
+
+        if user is None:
+            raise UserNotFoundError("El usuario no ha sido encontrado", 404)
+
+        if user.user_rol != ProfilesEnum.M.value:
+            raise WrongRolError("El rol del usuario creado no corresponde con el pérfil de médicos. Por favor, modifique su usario si desea generar un perfil de médico.", 400)
+
+        if user.medico == None:
+            raise MedicoAlreadyCreated("El usuario enviado no posee un perfil de médico generado", 400)
+        
+        user.medico.update_self(cmd)
+
+        await db.commit()
+    
 
     async def delete_medico(self, cmd: DeleteMedicoCmd, db: AsyncSession = Depends(get_db)): 
         user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user, db)
