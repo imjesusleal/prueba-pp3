@@ -21,7 +21,6 @@ class MedicoProfileHandler:
     def __init__(self):
         self.__user_repo = UserRepository()
         self.__medico_repo = MedicosRepo()
-        self.__upload_handler = UploadHandler()
 
     async def get_user_medico(self, id_user:int, db: AsyncSession = Depends(get_db)) -> MedicoProfile: 
         user: Users = await self.__user_repo.get_user_with_medico_profile(id_user, db)
@@ -32,12 +31,10 @@ class MedicoProfileHandler:
         if user.medico == None:
             raise MedicoNotFound("El usuario enviado no posee un perfil de médico generado. ", 404)
         
-        if user.medico.img_name:
-            pdf_bytes = self.__upload_handler.pdf_to_bytes_base64(user.medico.img_name)
-
-        return user.medico.map_to_model(pdf_bytes)
+        return user.medico.map_to_model()
 
     async def create_medico(self, cmd: AddMedicoCommand, db: AsyncSession = Depends(get_db)): 
+
         user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user, db)
 
         if user is None:

@@ -32,7 +32,7 @@ class Medicos(SQLModel, table=True):
         self.telefono = cmd.telefono
         self.modified_at = datetime.now()
 
-    def map_to_model(self, pdf_bytes: str = None) -> MedicoProfile:
+    def map_to_model(self) -> MedicoProfile:
         return MedicoProfile(
             nombre= self.nombre,
             apellido = self.apellido,
@@ -42,5 +42,5 @@ class Medicos(SQLModel, table=True):
             especialidad=self.especialidad,
             matricula=self.matricula,
             telefono=self.telefono,
-            img_bytes=pdf_bytes
+            img_name=self.img_name
             )

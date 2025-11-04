@@ -10,4 +10,4 @@ class MedicoProfile(BaseModel):
     telefono: str | None
     nombre: str
     apellido: str
-    img_bytes: str | None
+    img_name: str | None

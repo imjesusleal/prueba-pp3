@@ -54,6 +54,20 @@ class UploadHandler:
         await db.commit()
 
 
+    def pdf_to_bytes(self, pdf_name: str) -> bytes:
+        pdf_filepath = Path(self.__FULL_PATH) / pdf_name
+        try:
+            with open(pdf_filepath, 'rb') as f:
+                pdf_bytes = f.read()
+            return pdf_bytes
+        except FileNotFoundError:
+            print(f"Error: El archivo '{pdf_filepath}' no ha sido encontrado.")
+            return None
+        except Exception as e:
+            print(f"Ha ocurrido un error: {e}")
+            return None
+
+
     def __clear_img(self, img_name: str): 
         if not img_name:
             return 
@@ -65,18 +79,6 @@ class UploadHandler:
             ## Si no la encuentro ps ya fue, no borro nada ni rompo nada, solo grabo la que me pasaron y la piso en la base.
             return
         
-    def pdf_to_bytes_base64(self, pdf_name: str) -> str:
-        pdf_filepath = Path(self.__FULL_PATH) / pdf_name
 
-        try:
-            with open(pdf_filepath, 'rb') as f:
-                pdf_bytes = f.read()
-            return base64.b64encode(pdf_bytes).decode("utf-8") if pdf_bytes else None
-        except FileNotFoundError:
-            print(f"Error: El archivo '{pdf_filepath}' no ha sido encontrado.")
-            return None
-        except Exception as e:
-            print(f"Ha ocurrido un error: {e}")
-            return None
 
         
