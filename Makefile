@@ -1,5 +1,9 @@
 MSG ?= Migracion generada
 
+.PHONY:
+env:
+	.\.venv\Scripts\activate
+
 .PHONY: format
 format:
 	black .

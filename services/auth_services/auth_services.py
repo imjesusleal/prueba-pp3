@@ -36,11 +36,16 @@ class AuthServices:
             
             user: UserLogin = UserLogin(username = user_data.username, password = user_data.password)
 
-
+            # Lo busco por username pero no quiero tocar la firma porque se me olvido donde más lo llamo y no quiero hacer más pruebas jeje
             existeUser = await self.__user_repository.get_user(user, db)
 
             if existeUser is not None:
-                raise Exception("Loco ya existe ese usuario, no te podes registrar con ese!")
+                raise Exception("Ya existe un usuario creado con ese username, cambia de usuario para poder registrarte. ")
+
+            existeEmailRegistrado = await self.__user_repository.get_user_by_email(user_data.email, db)
+
+            if existeEmailRegistrado is not None: 
+                raise Exception("El email ya se encuentra utilizado. Por favor utilice otro email. ")
 
             # Crear usuario
             new_user = Users(
@@ -81,7 +86,7 @@ class AuthServices:
         if not self.__verify_password(credentials.password, user.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect username or password",
+                detail="Haz enviado un username o contraseña incorrecta. ",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         

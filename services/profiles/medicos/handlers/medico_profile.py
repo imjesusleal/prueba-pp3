@@ -85,6 +85,3 @@ class MedicoProfileHandler:
         user.delete_medico()
 
         await db.commit()
-        
-        
-        

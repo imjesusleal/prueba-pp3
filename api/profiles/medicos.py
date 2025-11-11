@@ -15,7 +15,7 @@ class MedicosProfileRouter:
     def __init__(self):
         self.__medico_handler = MedicoProfileHandler()
 
-        self.router = APIRouter(prefix="/profiles", tags=["profiles"])
+        self.router = APIRouter(prefix="/profiles/medicos", tags=["profiles/medicos"])
         self.router.get("/get", response_model=MedicoProfile, status_code=200)(self.get_profile)
         self.router.post("/create",status_code=201)(self.create_medico)
         self.router.post("/update",status_code=201)(self.update_medico)

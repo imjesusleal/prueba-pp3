@@ -8,6 +8,7 @@ from typing import ClassVar
 from db.entities.medicos import Medicos
 from db.entities.pacientes import Pacientes
 from services.profiles.medicos.commands.add_medico_command import AddMedicoCommand
+from services.profiles.pacientes.commands.add_paciente_cmd import AddPacienteCmd
 
 
 class Users(SQLModel, table=True):
@@ -37,5 +38,25 @@ class Users(SQLModel, table=True):
             apellido=cmd.apellido
             )
         
+    def create_paciente(self, cmd: AddPacienteCmd):
+        self.paciente = Pacientes(
+            id_user = self.id_user,
+            nombre= cmd.nombre,
+            apellido= cmd.apellido,
+            documento_identificacion= cmd.documento_identificativo,
+            create_at= datetime.now(),
+            updated_at = datetime.now()
+        )
+        
     def delete_medico(self):
+        """
+            Esto es una deficiencia mental mia, porque no confío en el repo que arme. Porlas, lo borro también del user y que se joda.
+        """
         self.medico = None
+    
+    def delete_paciente(self):
+        """
+            Esto es una deficiencia mental mia, porque no confío en el repo que arme. Porlas, lo borro también del user y que se joda.
+        """
+
+        self.paciente = None
