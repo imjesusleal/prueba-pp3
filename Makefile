@@ -29,11 +29,7 @@ dev:
 
 .PHONY: test
 test:
-	pytest
-
-.PHONY: test verbose
-test:
-	pytest -vs
+	pytest -vv
 
 .PHONY: install
 install:

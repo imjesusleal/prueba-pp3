@@ -78,7 +78,7 @@ class JwtService:
             new_token = uuid.uuid4()
             refresh_token = RefreshToken(id_user=id_user,
                                         access_token=access_token,
-                                        refresh_token = new_token, 
+                                        refresh_token = str(new_token), 
                                         is_used = 0, 
                                         valid_until= valido_hasta, 
                                         created_at= datetime.now(), 

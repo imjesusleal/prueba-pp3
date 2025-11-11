@@ -4,7 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from passlib.context import CryptContext
 
 from db.entities.refresh_token import RefreshToken
+from errors.admin.cant_register_admin_error import CantRegisterAdminError
+from errors.ierror_interface import IError
 from errors.refresh_token.refresh_token_invalid_error import RefreshTokenInvalidError
+from errors.users.email_used_error import EmailUsedError
+from errors.users.rol_not_found_error import RolNotFoundError
+from errors.users.user_created_error import UserCreatedError
 from models.auth_models.refresh_model import RefreshModel
 from models.auth_models.token_response import UserResponse
 from models.auth_models.user_login import UserLogin
@@ -15,6 +20,7 @@ from repository.users import UserRepository
 from db.entities.users import Users
 from db.db import get_db
 from services.auth_services.jwt_service import JwtService
+from services.profiles.enums.profiles_enums import ProfilesEnum
 
 class AuthServices: 
 
@@ -29,10 +35,13 @@ class AuthServices:
     async def register_user(self, user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         try:
         
+            if user_data.user_rol not in [ProfilesEnum.M.value, ProfilesEnum.P.value]:
+                raise CantRegisterAdminError("No te puedes registar como administrador. ", 400)
+        
             existeRol: bool = await self.__roles_repository.get_user_role(user_data.user_rol, db)
 
             if not existeRol:
-                raise Exception("Loco, no existe el rol que me mandaste. Mandame uno correctamente")
+                raise RolNotFoundError("Loco, no existe el rol que me mandaste. Mandame uno correctamente. ", 400)
             
             user: UserLogin = UserLogin(username = user_data.username, password = user_data.password)
 
@@ -40,12 +49,12 @@ class AuthServices:
             existeUser = await self.__user_repository.get_user(user, db)
 
             if existeUser is not None:
-                raise Exception("Ya existe un usuario creado con ese username, cambia de usuario para poder registrarte. ")
+                raise UserCreatedError("Ya existe un usuario creado con ese username, cambia de usuario para poder registrarte. ", 400)
 
             existeEmailRegistrado = await self.__user_repository.get_user_by_email(user_data.email, db)
 
             if existeEmailRegistrado is not None: 
-                raise Exception("El email ya se encuentra utilizado. Por favor utilice otro email. ")
+                raise EmailUsedError("El email ya se encuentra utilizado. Por favor utilice otro email. ", 400)
 
             # Crear usuario
             new_user = Users(
@@ -65,10 +74,18 @@ class AuthServices:
                 "user_id": new_user.id_user,
                 "username": new_user.username
             }
-        except Exception as e:
+    
+        except IError as e:
             await db.rollback()
-            print(f"Error en register: {e}")  # Ver en terminal
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=e.http_code, detail=str(e))
+        
+        except Exception as ex:
+            """Solo para excepciones no contraladas. 
+            Siempre deberíamos usar una interfaz común, 
+            como en nuestro caso de arriba que somos facheros. """
+            
+            await db.rollback()
+            raise HTTPException(status_code=500, detail=f"Algo ha salido mal. Comuniquese con sistemas. {ex}")
 
     async def authenticate_user(self, credentials: UserLogin, db: AsyncSession = Depends(get_db)) -> UserResponse:
         """Autenticar usuario y generar token"""

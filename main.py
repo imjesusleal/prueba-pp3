@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -28,6 +28,13 @@ try:
     @app.get("/health", tags=["Health Check"])
     def healt_check():
         return{"status": "ok"}
+    
+    @app.exception_handler(IError)
+    async def ierror_exception_handler(request: Request, exc: IError):
+        return JSONResponse(
+        status_code=exc.http_code,
+        content={"detail": exc.msg}
+    )
 
     app.add_middleware(
         CORSMiddleware,
@@ -35,13 +42,6 @@ try:
         allow_methods=["*"],
         allow_headers=["*"],
         allow_credentials=True
-    )
-
-    @app.exception_handler(IError)
-    async def ierror_exception_handler(request: Request, exc: IError):
-        return JSONResponse(
-        status_code=exc.http_code,
-        content={"detail": exc.msg}
     )
 
     # Routers
