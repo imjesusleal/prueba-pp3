@@ -24,7 +24,7 @@ class UploadHandler:
     def __init__(self):
         self.__user_repo = UserRepository()
 
-    async def upload_img(self, id_user: int,  file: UploadFile, db: AsyncSession = Depends(get_db)) -> dict: 
+    async def upload_img(self, id_user: int,  file: UploadFile, db: AsyncSession = Depends(get_db)) -> str: 
 
         user: Users = await self.__user_repo.get_user_with_profile(id_user, db)
 
@@ -52,6 +52,8 @@ class UploadHandler:
             user.paciente.img_name = full_filename
 
         await db.commit()
+        
+        return full_filename
 
 
     def pdf_to_bytes(self, pdf_name: str) -> bytes:

@@ -17,7 +17,7 @@ class UploadRouter:
         self.__upload_handler = UploadHandler()
 
         self.router = APIRouter(prefix="/uploads", tags=["uploads"])
-        self.router.post("/save_img", status_code=201)(self.upload_image)
+        self.router.post("/save_img", response_model=str,status_code=201)(self.upload_image)
         self.router.post("/download", response_class=Response, status_code=201)(self.download_profile_img)
 
     async def upload_image(self, file: UploadFile = File(), 
@@ -30,7 +30,9 @@ class UploadRouter:
         if not current_user["id_user"]:
             raise HTTPException(status_code=400, detail="Se debe enviar el identificador del usuario para guardar una imagen.")
 
-        await self.__upload_handler.upload_img(current_user["id_user"], file, db)
+        res =  await self.__upload_handler.upload_img(current_user["id_user"], file, db)
+        
+        return res
 
     async def download_profile_img(self, img_name:str = Body(embed=True), current_user: dict = Depends(jwt_service.get_current_user)): 
 
