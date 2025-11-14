@@ -46,7 +46,6 @@ class UserRepository:
         elif user.user_rol == ProfilesEnum.P.value:
             query = select(Users).filter(Users.id_user == user_id).options(selectinload(Users.paciente))
 
-    
         res = await db.execute(query)
         return res.scalars().first()
     

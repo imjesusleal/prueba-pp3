@@ -47,6 +47,8 @@ class UploadHandler:
             self.__clear_img(last_img)
             user.medico.img_name = full_filename
         elif user.user_rol == ProfilesEnum.P.value:
+            if user.paciente is None:
+                raise Exception(f"Se jodio. Tengo user {user} y de paciente nada: {user.paciente}")
             last_img = user.paciente.img_name
             self.__clear_img(last_img)
             user.paciente.img_name = full_filename

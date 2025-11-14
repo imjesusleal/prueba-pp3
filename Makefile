@@ -29,7 +29,7 @@ dev:
 
 .PHONY: test
 test:
-	pytest -vv
+	pytest -q --disable-warnings -vv
 
 .PHONY: install
 install:

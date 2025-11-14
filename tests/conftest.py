@@ -6,8 +6,6 @@ from db.entities import *
 from db.entities.users_roles import UsersRoles
 from main import app
 
-
-import pytest
 from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine

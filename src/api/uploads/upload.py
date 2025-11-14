@@ -10,8 +10,6 @@ from services.uploads.upload_handler import UploadHandler
 
 class UploadRouter:
 
-
-
     def __init__(self):
 
         self.__upload_handler = UploadHandler()
@@ -42,7 +40,7 @@ class UploadRouter:
         pdf_bytes = self.__upload_handler.pdf_to_bytes(img_name)
 
         headers = {
-        f"Content-Disposition": "attachment; filename={img_name}",
+        "Content-Disposition": f"attachment; filename={img_name}",
         "Content-Type": "application/pdf"
         }
 
