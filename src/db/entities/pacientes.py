@@ -14,7 +14,7 @@ class Pacientes(SQLModel, table=True):
 
     id_pacientes: int = Field(default=None, primary_key=True)
     id_user: int = Field(unique=True, foreign_key="users.id_user", ondelete="CASCADE")
-    documento_identificacion: int = Field(unique=True, foreign_key="documento_identificativo.id_documento")
+    documento_identificacion: int = Field(foreign_key="documento_identificativo.id_documento")
     nombre: str = Field(max_length=50)
     apellido: str = Field(max_length=50)
     create_at: datetime | None = Field(default=None)

@@ -16,8 +16,12 @@ class MedicosRepo:
         res = await db.execute(query)
         return res.scalars().first()
 
-    async def get_medico_by_user(self,id_user: int, db: AsyncSession= Depends(get_db)) -> Optional[Medicos]:#conecta un perfil usuario con un perfil medico
-        query = select(Medicos).filter(Medicos.id_user == id_user)
+    async def get_medico_by_user(self,id_user: int, db: AsyncSession= Depends(get_db), no_tracking = False) -> Optional[Medicos]:#conecta un perfil usuario con un perfil medico
+        query = select(Medicos) 
+        if (no_tracking):
+            query = query.filter(Medicos.id_user == id_user).execution_options(identity_token = "no_tracking")
+        else:
+            query = query.filter(Medicos.id_user == id_user)
         res = await db.execute(query)
         return res.scalars().first()
 

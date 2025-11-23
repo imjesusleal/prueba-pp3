@@ -4,7 +4,6 @@ from datetime import datetime
 
 from models.profiles.medifco_profile import MedicoProfile
 from services.profiles.medicos.commands.updt_medico_command import UpdtMedicoCommand
-# from sqlalchemy.orm import relationship
 
 if TYPE_CHECKING:
     from users import Users

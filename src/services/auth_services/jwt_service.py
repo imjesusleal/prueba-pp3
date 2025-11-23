@@ -20,7 +20,7 @@ class JwtService:
 
     __SECRET_KEY = os.getenv("SECRET_KEY")
     __ALGORITHM = "HS256"
-    __ACCESS_TOKEN_EXPIRE_MINUTES = 60
+    __ACCESS_TOKEN_EXPIRE_MINUTES = 1
     __AUTH_SCHEME = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
     def __init__(self):
@@ -53,12 +53,12 @@ class JwtService:
 
         refresh_token = await self.__get_refresh_token(user.id_user, jsonToken, db)
 
-        return UserResponse(access_token=jsonToken, refresh_token=refresh_token, username=user.username, id_user=user.id_user)
+        return UserResponse(access_token=jsonToken, refresh_token=refresh_token, username=user.username, id_user=user.id_user, user_rol = user.user_rol)
     
     async def create_if_reathenticate(self, refresh_model: RefreshModel, db: AsyncSession = Depends(get_db)) -> UserResponse:
         await self.__refresh_token_repo.set_token_as_invalid(refresh_model, db)
 
-        user = await self.__user_repo.get_user_by_id(refresh_model.id_user, db)
+        user = await self.__user_repo.get_user_by_id(refresh_model.id_user, db, True)
 
         if user is None:
             raise UserNotFoundError("El usuario informado no ha sido encontrado. ", 400)

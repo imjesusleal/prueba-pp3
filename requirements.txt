@@ -41,10 +41,11 @@ nodeenv==1.9.1
 packaging==25.0
 passlib==1.7.4
 pathspec==0.12.1
+pillow==12.0.0
 platformdirs==4.3.8
 pluggy==1.5.0
 pre_commit==4.2.0
--e git+https://github.com/imjesusleal/prueba-pp3.git@57a16ca2129689f0f2bee52269c3f229edc92a91#egg=prueba_pp3
+-e git+https://github.com/imjesusleal/prueba-pp3.git@adfafcf0fc127d20b1a9e756079c84e091ecf763#egg=prueba_pp3
 pyasn1==0.6.1
 pycodestyle==2.13.0
 pycparser==2.23
@@ -52,6 +53,7 @@ pydantic==2.11.4
 pydantic_core==2.33.2
 pyflakes==3.3.2
 Pygments==2.19.1
+PyMuPDF==1.26.6
 pyodbc==5.2.0
 pytest==8.3.5
 pytest-asyncio==0.26.0

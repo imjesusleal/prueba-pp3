@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import uuid
 from fastapi import Depends, UploadFile
+import fitz
 
 from db.db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,14 +39,19 @@ class UploadHandler:
         full_filename = f'{file_name_no_extension[0]}_{stamp}.{file_name_no_extension[1]}'
         file_path = self.__FULL_PATH / full_filename
 
-        with file_path.open("wb") as buffer: 
-            shutil.copyfileobj(file.file, buffer)
+        if file_name_no_extension[1] == 'pdf':
+            full_filename = await self.__handle_pdf(file, file_name_no_extension, stamp)
+            file_path = self.__FULL_PATH / full_filename
+        else:
+            with file_path.open("wb") as buffer: 
+                shutil.copyfileobj(file.file, buffer)
 
         
         if user.user_rol == ProfilesEnum.M.value:
             last_img = user.medico.img_name
             self.__clear_img(last_img)
             user.medico.img_name = full_filename
+            
         elif user.user_rol == ProfilesEnum.P.value:
             if user.paciente is None:
                 raise Exception(f"Se jodio. Tengo user {user} y de paciente nada: {user.paciente}")
@@ -82,6 +88,28 @@ class UploadHandler:
         except:
             ## Si no la encuentro ps ya fue, no borro nada ni rompo nada, solo grabo la que me pasaron y la piso en la base.
             return
+        
+    async def __handle_pdf(self,file: UploadFile, name_parts: list[str], stamp: str): 
+
+        contents = await file.read()
+        
+
+        pdf_doc = fitz.open(stream=contents, filetype="pdf")
+        
+
+        page = pdf_doc[0]
+
+        pix = page.get_pixmap()
+        
+
+        stamp = uuid.uuid4()
+        base_name = name_parts[0]
+        jpg_name = f"{base_name}_{stamp}.jpg"
+        jpg_path = self.__FULL_PATH / jpg_name
+        
+        pix.save(jpg_path)
+        
+        return jpg_name
         
 
 

@@ -6,7 +6,17 @@ from sqlalchemy import pool
 
 from alembic import context
 from dotenv import load_dotenv
-from db.entities import * 
+from db.entities.users_roles import UsersRoles
+from db.entities.refresh_token import RefreshToken
+from db.entities.users import Users
+from db.entities.pacientes import Pacientes
+from db.entities.medicos import Medicos
+from db.entities.especialidades import Especialidades
+from db.entities.consultas import Consulta
+from db.entities.documento_identificativo import DocumentoIdentificativo
+from db.entities.reviews import Reviews
+from db.entities.turnos import Turnos
+
 from sqlmodel import SQLModel
 
 

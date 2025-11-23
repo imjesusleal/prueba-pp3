@@ -23,11 +23,15 @@ class UserRepository:
         res = await db.execute(query)
         return res.scalars().first()
     
-    async def get_user_by_id(self,  user_id: int, db: AsyncSession = Depends(get_db)) -> Optional[Users]:
+    async def get_user_by_id(self,  user_id: int, db: AsyncSession = Depends(get_db), no_tracking = False) -> Optional[Users]:
         """
             Busca el user por id para refrescar el token
         """
-        query = select(Users).filter(Users.id_user == user_id)
+        query = select(Users)
+        if no_tracking:
+            query = query.filter(Users.id_user == user_id).execution_options(identity_token = "no_tracking")
+        else:
+            query = query.filter(Users.id_user == user_id)
         res = await db.execute(query)
         db_user = res.scalars().first()
         return db_user
@@ -55,8 +59,14 @@ class UserRepository:
         return res.scalars().first()
     
 
-    async def get_user_with_paciente_profile(self, user_id: int, db: AsyncSession = Depends(get_db)):
-        query = select(Users).filter(Users.id_user == user_id).options(joinedload(Users.paciente))
+    async def get_user_with_paciente_profile(self, user_id: int, db: AsyncSession = Depends(get_db), no_tracking = False):
+        query = select(Users).filter(Users.id_user == user_id)
+        
+        if no_tracking: 
+            query = query.execution_options(identity_token = "no_tracking").options(joinedload(Users.paciente))
+        else:
+            query = query.options(joinedload(Users.paciente))
+        
         res = await db.execute(query)
         return res.scalars().first()
     
