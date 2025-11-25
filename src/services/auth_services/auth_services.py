@@ -117,7 +117,7 @@ class AuthServices:
         refresh_token: RefreshToken | None =  await self.__refresh_token_repo.get_active_refresh_token(refresh_model.id_user, db)
 
         if (refresh_token is not None and refresh_token.refresh_token != refresh_model.refresh_token):
-            raise RefreshTokenInvalidError(f"El token enviado no corresponde al último válidado por el sistema.", 404)
+            raise RefreshTokenInvalidError(f"El token enviado no corresponde al último válidado por el sistema.", 403)
         
         return await self.__jwt_service.create_if_reathenticate(refresh_model, db)
         
