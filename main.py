@@ -38,7 +38,7 @@ try:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:4200"],
+        allow_origins=["http://localhost:4200", "http://localhost:8100"], #El primero cuando lo ejecuto desde angular, el otro desde ionic
         allow_methods=["*"],
         allow_headers=["*"],
         allow_credentials=True
