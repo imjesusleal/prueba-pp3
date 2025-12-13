@@ -10,3 +10,14 @@ class Especialidades(SQLModel, table=True):
     descripcion: str = Field()
     created_at: datetime | None = Field(default=None)
     modified_at: datetime | None = Field(default=None)
+    
+    
+    @staticmethod
+    def create(sigla_especialidad: str, descripcion: str) -> "Especialidades":
+        especialidad = Especialidades(
+            sigla_especialidad=sigla_especialidad,
+            descripcion=descripcion,
+            created_at=datetime.utcnow(),
+            modified_at=datetime.utcnow()
+        )
+        return especialidad 

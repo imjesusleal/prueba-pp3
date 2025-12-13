@@ -7,6 +7,8 @@ from services.profiles.medicos.commands.updt_medico_command import UpdtMedicoCom
 
 if TYPE_CHECKING:
     from users import Users
+    from especialidades import Especialidades
+    from reviews import Reviews
 
 class Medicos(SQLModel, table=True):
     __tablename__ = "medicos"
@@ -24,6 +26,8 @@ class Medicos(SQLModel, table=True):
     img_name: str = Field(default=None, nullable=True)
 
     user: "Users"  = Relationship(back_populates="medico", sa_relationship_kwargs={"uselist": False})
+    m_especialidad: "Especialidades" = Relationship(sa_relationship_kwargs={"uselist": False})
+    m_reviews: list["Reviews"] = Relationship(back_populates="r_medicos")
 
 
     def update_self(self, cmd: UpdtMedicoCommand):

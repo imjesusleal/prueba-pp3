@@ -20,7 +20,7 @@ class JwtService:
 
     __SECRET_KEY = os.getenv("SECRET_KEY")
     __ALGORITHM = "HS256"
-    __ACCESS_TOKEN_EXPIRE_MINUTES = 1
+    __ACCESS_TOKEN_EXPIRE_MINUTES = 1440
     __AUTH_SCHEME = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
     def __init__(self):
@@ -46,7 +46,7 @@ class JwtService:
         """
             Genera el token JWT que se le entrega a cada usuario con login exitoso
         """
-        to_encode = {"sub": user.username, "id_user": user.id_user}
+        to_encode = {"sub": user.username, "id_user": user.id_user, "user_rol": user.user_rol}
         expire = datetime.utcnow() + (expires_delta or timedelta(minutes=self.__ACCESS_TOKEN_EXPIRE_MINUTES))
         to_encode.update({"exp": expire})
         jsonToken = jwt.encode(to_encode, self.__SECRET_KEY, algorithm=self.__ALGORITHM)

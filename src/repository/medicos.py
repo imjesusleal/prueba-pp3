@@ -4,12 +4,30 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.db import get_db
 from db.entities.medicos import Medicos
 from typing import List, Optional
+from sqlalchemy.orm import selectinload, joinedload
+
+from services.medicos.commands.get_all.get_medicos_cmd import GetAllMedicosCmd
 
 class MedicosRepo:
 
     async def get_all_medicos(self,db: AsyncSession = Depends(get_db)) -> List[Medicos]:
         res = await db.execute(select(Medicos))
         return res.scalars().all()
+
+    async def get_all_medicos_paginated(self,cmd: GetAllMedicosCmd, db: AsyncSession = Depends(get_db)) -> List[Medicos]:
+        query = select(Medicos).options(joinedload(Medicos.m_especialidad), joinedload(Medicos.m_reviews)).execution_options(identity_token="no_tracking")
+        
+        if cmd.especialidad:
+            query = query.filter(Medicos.especialidad == cmd.especialidad)
+        
+        if cmd.cursor_id:
+            query = query.filter(Medicos.id_medico > cmd.cursor_id)
+              
+        query = query.limit(cmd.limit)
+        
+        res = await db.execute(query)
+        return res.unique().scalars().all()
+        
 
     async def get_medico(self,id: int, db: AsyncSession= Depends(get_db)) -> Optional[Medicos]:
         query = select(Medicos).filter(Medicos.id_medico == id)

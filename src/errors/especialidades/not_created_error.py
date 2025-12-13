@@ -1,0 +1,4 @@
+from errors.ierror_interface import IError
+
+class EspecialidadNotCreatedError(IError):
+    pass
