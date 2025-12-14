@@ -11,6 +11,7 @@ from api.profiles.pacientes import router as pacientes_router
 from api.uploads.upload import router as upload_router
 from api.medicos.medicos import router as medicos_router
 from api.especialidades.especialidades import router as especialidades_router
+from api.turnos.turnos import router as turnos_router
 
 try: 
     
@@ -53,6 +54,7 @@ try:
     app.include_router(pacientes_router.router, prefix="/api/v1")
     app.include_router(medicos_router.router, prefix="/api/v1")
     app.include_router(especialidades_router.router, prefix="/api/v1")
+    app.include_router(turnos_router.router, prefix="/api/v1")
     
 except IError as ex:
     raise Exception(status_code=ex.http_code,detail= f"{ex.msg}")

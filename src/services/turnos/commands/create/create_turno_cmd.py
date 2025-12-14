@@ -1,0 +1,21 @@
+from datetime import datetime
+from pydantic import BaseModel
+
+from errors.turnos.mal_horario_enviado_error import MalHorarioEnviadoError
+
+
+class CreateTurnoCmd(BaseModel):
+    id_medico: int
+    id_paciente: int
+    hora_entrada: datetime
+    hora_salida: datetime
+    
+    
+    def validar(self) -> None:
+        if (self.hora_entrada > self.hora_salida):
+            raise MalHorarioEnviadoError("La hora de entrada no puede ser mayor a la hora de salida. ", 400)
+        
+        if (self.hora_entrada < datetime.now()):
+            raise MalHorarioEnviadoError("La hora de entrada no puede ser menor a la hora actual. ", 400)
+        
+        

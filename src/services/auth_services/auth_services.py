@@ -24,21 +24,22 @@ from services.profiles.enums.profiles_enums import ProfilesEnum
 
 class AuthServices: 
 
-    def __init__(self):
-        self.__roles_repository = UsersRolesRepository()
-        self.__user_repository = UserRepository()
-        self.__refresh_token_repo: RefreshTokenRepo = RefreshTokenRepo()
-        self.__jwt_service: JwtService = JwtService()
+    def __init__(self, db: AsyncSession):
+        self.__roles_repository = UsersRolesRepository(db)
+        self.__user_repository = UserRepository(db)
+        self.__refresh_token_repo: RefreshTokenRepo = RefreshTokenRepo(db)
+        self.__jwt_service: JwtService = JwtService(db)
+        self._db = db
 
     __pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
-    async def register_user(self, user_data: UserRegister, db: AsyncSession = Depends(get_db)):
+    async def register_user(self, user_data: UserRegister):
         try:
         
             if user_data.user_rol not in [ProfilesEnum.M.value, ProfilesEnum.P.value]:
                 raise CantRegisterAdminError("No te puedes registar como administrador. ", 400)
         
-            existeRol: bool = await self.__roles_repository.get_user_role(user_data.user_rol, db)
+            existeRol: bool = await self.__roles_repository.get_user_role(user_data.user_rol)
 
             if not existeRol:
                 raise RolNotFoundError("Loco, no existe el rol que me mandaste. Mandame uno correctamente. ", 400)
@@ -46,12 +47,12 @@ class AuthServices:
             user: UserLogin = UserLogin(username = user_data.username, password = user_data.password)
 
             # Lo busco por username pero no quiero tocar la firma porque se me olvido donde más lo llamo y no quiero hacer más pruebas jeje
-            existeUser = await self.__user_repository.get_user(user, db)
+            existeUser = await self.__user_repository.get_user(user)
 
             if existeUser is not None:
                 raise UserCreatedError("Ya existe un usuario creado con ese username, cambia de usuario para poder registrarte. ", 400)
 
-            existeEmailRegistrado = await self.__user_repository.get_user_by_email(user_data.email, db)
+            existeEmailRegistrado = await self.__user_repository.get_user_by_email(user_data.email)
 
             if existeEmailRegistrado is not None: 
                 raise EmailUsedError("El email ya se encuentra utilizado. Por favor utilice otro email. ", 400)
@@ -65,9 +66,9 @@ class AuthServices:
                 created_at=datetime.now()
             )
             
-            db.add(new_user)
-            await db.commit()
-            await db.refresh(new_user)
+            self._db.add(new_user)
+            await self._db.commit()
+            await self._db.refresh(new_user)
             
             return {
                 "message": "User created successfully",
@@ -76,7 +77,7 @@ class AuthServices:
             }
     
         except IError as e:
-            await db.rollback()
+            await self._db.rollback()
             raise HTTPException(status_code=e.http_code, detail=str(e))
         
         except Exception as ex:
@@ -84,13 +85,13 @@ class AuthServices:
             Siempre deberíamos usar una interfaz común, 
             como en nuestro caso de arriba que somos facheros. """
             
-            await db.rollback()
+            await self._db.rollback()
             raise HTTPException(status_code=500, detail=f"Algo ha salido mal. Comuniquese con sistemas. {ex}")
 
-    async def authenticate_user(self, credentials: UserLogin, db: AsyncSession = Depends(get_db)) -> UserResponse:
+    async def authenticate_user(self, credentials: UserLogin) -> UserResponse:
         """Autenticar usuario y generar token"""
         # Buscar usuario
-        user = await self.__user_repository.get_user(credentials, db)
+        user = await self.__user_repository.get_user(credentials)
         
         if not user:
             raise HTTPException(
@@ -108,18 +109,18 @@ class AuthServices:
             )
         
 
-        await self.__jwt_service.set_all_tokens_as_invalid(user.id_user, db)
+        await self.__jwt_service.set_all_tokens_as_invalid(user.id_user)
 
-        return await self.__jwt_service.create_access_token(user, db)
+        return await self.__jwt_service.create_access_token(user)
 
 
-    async def reauthenticate_user(self, refresh_model: RefreshModel, db: AsyncSession = Depends(get_db)) -> UserResponse:
-        refresh_token: RefreshToken | None =  await self.__refresh_token_repo.get_active_refresh_token(refresh_model.id_user, db)
+    async def reauthenticate_user(self, refresh_model: RefreshModel) -> UserResponse:
+        refresh_token: RefreshToken | None =  await self.__refresh_token_repo.get_active_refresh_token(refresh_model.id_user)
 
         if (refresh_token is not None and refresh_token.refresh_token != refresh_model.refresh_token):
             raise RefreshTokenInvalidError(f"El token enviado no corresponde al último válidado por el sistema.", 403)
         
-        return await self.__jwt_service.create_if_reathenticate(refresh_model, db)
+        return await self.__jwt_service.create_if_reathenticate(refresh_model)
         
 
 

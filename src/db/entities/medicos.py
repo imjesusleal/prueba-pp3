@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from users import Users
     from especialidades import Especialidades
     from reviews import Reviews
+    from turnos import Turnos
 
 class Medicos(SQLModel, table=True):
     __tablename__ = "medicos"
@@ -28,6 +29,7 @@ class Medicos(SQLModel, table=True):
     user: "Users"  = Relationship(back_populates="medico", sa_relationship_kwargs={"uselist": False})
     m_especialidad: "Especialidades" = Relationship(sa_relationship_kwargs={"uselist": False})
     m_reviews: list["Reviews"] = Relationship(back_populates="r_medicos")
+    m_turnos: list["Turnos"] = Relationship(back_populates="t_medicos")
 
 
     def update_self(self, cmd: UpdtMedicoCommand):

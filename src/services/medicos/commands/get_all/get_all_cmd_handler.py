@@ -11,21 +11,20 @@ from services.medicos.models.get_all_medicos_dto import GetAllMedicosDto
 from services.medicos.services.calculate_rating_service import CalculateRatingService
 
 class GetAllMedicosCmdHandler:
-    def __init__(self):
-        self.__medico_repository = MedicosRepo()
+    def __init__(self, db: AsyncSession):
+        self.__medico_repository = MedicosRepo(db)
         self.__calculate_rating_service = CalculateRatingService()
         
-    async def handle(self, cmd: GetAllMedicosCmd, db: AsyncSession = Depends(get_db)) -> list[GetAllMedicosDto]:
-        data: list[Medicos] = await self.__medico_repository.get_all_medicos_paginated(cmd, db)
+    async def handle(self, cmd: GetAllMedicosCmd) -> list[GetAllMedicosDto]:
+        data: list[Medicos] = await self.__medico_repository.get_all_medicos_paginated(cmd)
         
         res: list[GetAllMedicosDto] = []
         
         for medico in data:
             rating = self.__calculate_rating_service.calculate_rating(medico.m_reviews)
             reviews = len(medico.m_reviews)
-            res.append(MedicosMapper.map_to_grid_model(medico, rating, reviews))
-
-            
-        return res
+            res.append(MedicosMapper.map_to_grid_model(medico, rating, reviews)) 
+        
+        return [i for i in res if i.rating >= cmd.clasificacion]
         
         

@@ -58,5 +58,4 @@ class Users(SQLModel, table=True):
         """
             Esto es una deficiencia mental mia, porque no confío en el repo que arme. Porlas, lo borro también del user y que se joda.
         """
-
         self.paciente = None

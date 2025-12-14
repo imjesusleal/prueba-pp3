@@ -22,12 +22,13 @@ class UploadHandler:
     __FULL_PATH = Path.joinpath(__BASE_PATH, __UPLOAD_DIR)
     os.makedirs(__FULL_PATH,exist_ok=True)
 
-    def __init__(self):
-        self.__user_repo = UserRepository()
+    def __init__(self, db: AsyncSession):
+        self.__user_repo = UserRepository(db)
+        self._db = db
 
-    async def upload_img(self, id_user: int,  file: UploadFile, db: AsyncSession = Depends(get_db)) -> str: 
+    async def upload_img(self, id_user: int,  file: UploadFile) -> str: 
 
-        user: Users = await self.__user_repo.get_user_with_profile(id_user, db)
+        user: Users = await self.__user_repo.get_user_with_profile(id_user)
 
         if not user:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -59,7 +60,7 @@ class UploadHandler:
             self.__clear_img(last_img)
             user.paciente.img_name = full_filename
 
-        await db.commit()
+        await self._db.commit()
         
         return full_filename
 

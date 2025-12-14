@@ -1,6 +1,9 @@
-from sqlmodel import SQLModel, Field
+from typing import TYPE_CHECKING
+from sqlmodel import Relationship, SQLModel, Field
 from datetime import datetime
-from typing import Optional
+
+if TYPE_CHECKING:
+    from medicos import Medicos
 
 class Turnos(SQLModel, table=True):
     __tablename__ = "turnos"
@@ -13,3 +16,18 @@ class Turnos(SQLModel, table=True):
     completado_exitosamente: bool = Field()
     created_at: datetime | None = Field(default=None)
     modified_at: datetime | None = Field(default=None)
+    
+    t_medicos: "Medicos" = Relationship(back_populates="m_turnos", sa_relationship_kwargs={"uselist": False})
+    
+    
+    @staticmethod
+    def create(id_medico: int, id_paciente: int, hora_entrada: datetime, hora_salida: datetime) -> "Turnos":
+        return Turnos(
+            id_medico=id_medico,
+            id_paciente=id_paciente,
+            hora_entrada=hora_entrada,
+            hora_salida=hora_salida,
+            completado_exitosamente=False,
+            created_at=datetime.now(),
+            modified_at=datetime.now()
+        )

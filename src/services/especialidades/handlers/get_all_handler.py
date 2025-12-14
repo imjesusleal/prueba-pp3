@@ -6,12 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.especialidades.models.especialidades_dto import EspecialidadesDto
 
 class GetAllEspecialidadesHandler:
-    def __init__(self):
-        self.__especialidades_repository = EspecialidadesRepo() 
+    def __init__(self, db: AsyncSession):
+        self.__especialidades_repository = EspecialidadesRepo(db)
     
     
-    async def handle(self, db: AsyncSession = Depends(get_db)) -> list[EspecialidadesDto]:
-        data: list[Especialidades] = await self.__especialidades_repository.get_all_especialidades(db)
+    async def handle(self) -> list[EspecialidadesDto]:
+        data: list[Especialidades] = await self.__especialidades_repository.get_all_especialidades()
         
         res: list[EspecialidadesDto] = []
         

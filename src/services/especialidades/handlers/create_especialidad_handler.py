@@ -8,12 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class CreateEspecialidadHandler:
-    def __init__(self):
-        self.especialidad_repo = EspecialidadesRepo()
+    def __init__(self, db: AsyncSession):
+        self.especialidad_repo = EspecialidadesRepo(db)
         
-    async def handle(self, cmd: CreateEspecialidadCmd, db: AsyncSession = Depends(get_db)):
+    async def handle(self, cmd: CreateEspecialidadCmd):
         especialidad = Especialidades.create(cmd.sigla_especialidad, cmd.descripcion) 
-        new_especialidad = await self.especialidad_repo.create_especialidad(especialidad, db)
+        new_especialidad = await self.especialidad_repo.create_especialidad(especialidad)
         
         if not new_especialidad:
             raise EspecialidadNotCreatedError("Ups, ocurrio un error generando la especialiad. ", 500)

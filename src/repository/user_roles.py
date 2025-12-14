@@ -9,18 +9,21 @@ from typing import List, Optional
 
 class UsersRolesRepository: 
 
-    async def get_all_users_roles(self,db: AsyncSession = Depends(get_db)) -> List[UsersRoles]:
-        res = await db.execute(select(UsersRoles))
+    def __init__(self, db: AsyncSession): 
+        self._db = db
+
+    async def get_all_users_roles(self) -> List[UsersRoles]:
+        res = await self._db.execute(select(UsersRoles))
         #es equivalente a escribir en SQL: SELECT * FROM users_roles/db.execute se consulta a la BD y se espera la respuesta en el 'res'
         return res.scalars().all()#lo devuelve en una lista
 
-    async def get_user_role(self,id: int, db: AsyncSession = Depends(get_db)) -> Optional[UsersRoles]:
-        query = select(UsersRoles).filter(UsersRoles.id_users_roles == id)#se puede traducir como un WHERE
-        res = await db.execute(query)
+    async def get_user_role(self,id: int) -> Optional[UsersRoles]:
+        query = select(UsersRoles).filter(UsersRoles.id_users_roles == id)
+        res = await self._db.execute(query)
         return res.scalars().first()
 
-    async def get_user_role_by_rol(self,rol: str, db: AsyncSession = Depends(get_db)) -> Optional[UsersRoles]:
-        query = select(UsersRoles).filter(UsersRoles.rol == rol)#funciona como un WHERE rol 
-        res = await db.execute(query)
+    async def get_user_role_by_rol(self,rol: str) -> Optional[UsersRoles]:
+        query = select(UsersRoles).filter(UsersRoles.rol == rol)
+        res = await self._db.execute(query)
         return res.scalars().first()
     

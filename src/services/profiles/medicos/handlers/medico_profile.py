@@ -18,12 +18,13 @@ from services.uploads.upload_handler import UploadHandler
 
 
 class MedicoProfileHandler:
-    def __init__(self):
-        self.__user_repo = UserRepository()
-        self.__medico_repo = MedicosRepo()
+    def __init__(self, db: AsyncSession):
+        self.__user_repo = UserRepository(db)
+        self.__medico_repo = MedicosRepo(db)
+        self._db = db
 
-    async def get_user_medico(self, id_user:int, db: AsyncSession = Depends(get_db)) -> MedicoProfile: 
-        user: Users = await self.__user_repo.get_user_with_medico_profile(id_user, db)
+    async def get_user_medico(self, id_user:int) -> MedicoProfile: 
+        user: Users = await self.__user_repo.get_user_with_medico_profile(id_user)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -33,9 +34,9 @@ class MedicoProfileHandler:
         
         return user.medico.map_to_model()
 
-    async def create_medico(self, cmd: AddMedicoCommand, db: AsyncSession = Depends(get_db)): 
+    async def create_medico(self, cmd: AddMedicoCommand): 
 
-        user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user, db)
+        user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -49,10 +50,10 @@ class MedicoProfileHandler:
         
         user.create_medico(cmd)
 
-        await db.commit()
+        await self._db.commit()
 
-    async def update_perfil_medico(self,user_id:int, cmd: UpdtMedicoCommand, db: AsyncSession = Depends(get_db)):
-        user: Users = await self.__user_repo.get_user_with_medico_profile(user_id, db)
+    async def update_perfil_medico(self,user_id:int, cmd: UpdtMedicoCommand):
+        user: Users = await self.__user_repo.get_user_with_medico_profile(user_id)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -65,11 +66,11 @@ class MedicoProfileHandler:
         
         user.medico.update_self(cmd)
 
-        await db.commit()
+        await self._db.commit()
     
 
-    async def delete_medico(self, cmd: DeleteMedicoCmd, db: AsyncSession = Depends(get_db)): 
-        user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user, db)
+    async def delete_medico(self, cmd: DeleteMedicoCmd): 
+        user: Users = await self.__user_repo.get_user_with_medico_profile(cmd.id_user)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -81,7 +82,7 @@ class MedicoProfileHandler:
             raise MedicoAlreadyCreated("El usuario enviado no posee un perfil de médico generado. ", 400)
     
         
-        await self.__medico_repo.delete_medico(user.medico, db)
+        await self.__medico_repo.delete_medico(user.medico)
         user.delete_medico()
 
-        await db.commit()
+        await self._db.commit()

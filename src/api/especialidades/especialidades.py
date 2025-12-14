@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from db.db import get_db
-from services.auth_services.jwt_service import jwt_service
+from services.auth_services.jwt_service import get_current_user
 from services.especialidades.commands.create_especialidad_cmd import CreateEspecialidadCmd
 from services.especialidades.handlers.create_especialidad_handler import CreateEspecialidadHandler
 from services.especialidades.handlers.get_all_handler import GetAllEspecialidadesHandler
@@ -10,18 +10,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 class EspecialidadesRouter:
     def __init__(self):
-        self.__get_all_handler = GetAllEspecialidadesHandler()
-        self.__create_handler = CreateEspecialidadHandler()
-        
-        
         self.router = APIRouter(prefix="/especialidades", tags=["especialidades"])
         self.router.get("/getAll", response_model=list[EspecialidadesDto], status_code=200)(self.get_all)
         self.router.post("/create", status_code=201)(self.create)
         
-    async def get_all(self, db: AsyncSession = Depends(get_db), current_user: dict = Depends(jwt_service.get_current_user)) -> list[EspecialidadesDto]:
-        return await self.__get_all_handler.handle(db)
+    async def get_all(self, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)) -> list[EspecialidadesDto]:
+        handler = GetAllEspecialidadesHandler(db)
+        return await handler.handle()
 
-    async def create(self, cmd: CreateEspecialidadCmd, db: AsyncSession = Depends(get_db), current_user: dict = Depends(jwt_service.get_current_user)):
-        await self.__create_handler.handle(cmd, db)
+    async def create(self, cmd: CreateEspecialidadCmd, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+        handler = CreateEspecialidadHandler(db)
+        await handler.handle(cmd)
 
 router = EspecialidadesRouter()

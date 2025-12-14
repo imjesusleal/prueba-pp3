@@ -14,7 +14,6 @@ class AuthRouter:
         Router para registrar y autenticar.
     '''
     def __init__(self):
-        self.__auth_service = AuthServices()
 
 
         self.router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -25,12 +24,14 @@ class AuthRouter:
     # Endpoints
     async def register(self, user_data: UserRegister, db: AsyncSession = Depends(get_db)):
         """Registrar nuevo usuario"""
-        return await self.__auth_service.register_user(user_data, db)
+        handler = AuthServices(db)
+        return await handler.register_user(user_data)
     
     async def login(self, response: Response, credentials: UserLogin, db: AsyncSession = Depends(get_db)) -> UserResponse:
         """Login de usuario - retorna token JWT"""
+        handler = AuthServices(db)
         
-        res = await self.__auth_service.authenticate_user(credentials,db)
+        res = await handler.authenticate_user(credentials)
         
         json_res = JSONResponse(content=res.model_dump())
 
@@ -41,8 +42,9 @@ class AuthRouter:
         
     
     async def reauthenticate(self,request: Request, db: AsyncSession = Depends(get_db)):
+        handler = AuthServices(db)
         refresh_model = self.__get_cookies(request)
-        res = await self.__auth_service.reauthenticate_user(refresh_model, db)
+        res = await handler.reauthenticate_user(refresh_model)
         
         json_res = JSONResponse(content=res.model_dump())
 

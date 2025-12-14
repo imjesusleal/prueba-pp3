@@ -6,20 +6,23 @@ from db.entities.pacientes import Pacientes
 from typing import List, Optional
 
 class PacienteRepo: 
+    
+    def __init__(self, db: AsyncSession):
+        self._db = db
 
-    async def get_all_pacientes(db: AsyncSession= Depends(get_db)) -> List[Pacientes]:
-        res = await db.execute(select(Pacientes))
+    async def get_all_pacientes(self) -> List[Pacientes]:
+        res = await self._db.execute(select(Pacientes))
         return res.scalars().all()
 
-    async def get_paciente(id: int, db: AsyncSession= Depends(get_db)) -> Optional[Pacientes]:
+    async def get_paciente(self,id: int) -> Optional[Pacientes]:
         query = select(Pacientes).filter(Pacientes.id_pacientes == id)
-        res = await db.execute(query)
+        res = await self._db.execute(query)
         return res.scalars().first()
 
-    async def get_paciente_by_user(id_user: int, db: AsyncSession= Depends(get_db)) -> Optional[Pacientes]:
+    async def get_paciente_by_user(self,id_user: int) -> Optional[Pacientes]:
         query = select(Pacientes).filter(Pacientes.id_user == id_user)
-        res = await db.execute(query)
+        res = await self._db.execute(query)
         return res.scalars().first()
 
-    async def delete_paciente(self,paciente: Pacientes, db: AsyncSession= Depends(get_db)) -> None:
-        await db.delete(paciente)
+    async def delete_paciente(self,paciente: Pacientes) -> None:
+        await self._db.delete(paciente)

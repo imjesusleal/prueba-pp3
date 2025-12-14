@@ -15,12 +15,13 @@ from services.profiles.pacientes.commands.delete_paciente_cmd import DeletePacie
 from services.profiles.pacientes.commands.updt_paciente_cmd import UpdtPacienteCommand
 
 class PacienteProfileHandler:
-    def __init__(self):
-        self.__user_repo = UserRepository()
-        self.__paciente_repo = PacienteRepo()
+    def __init__(self, db: AsyncSession):
+        self.__user_repo = UserRepository(db)
+        self.__paciente_repo = PacienteRepo(db)
+        self._db = db
 
-    async def get_user_paciente(self, id_user:int, db: AsyncSession = Depends(get_db)) -> MedicoProfile: 
-        user: Users = await self.__user_repo.get_user_with_paciente_profile(id_user, db)
+    async def get_user_paciente(self, id_user:int) -> MedicoProfile: 
+        user: Users = await self.__user_repo.get_user_with_paciente_profile(id_user)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -30,9 +31,9 @@ class PacienteProfileHandler:
         
         return user.paciente.map_to_model()
 
-    async def create_paciente(self, cmd: AddPacienteCmd, db: AsyncSession = Depends(get_db)): 
+    async def create_paciente(self, cmd: AddPacienteCmd): 
 
-        user: Users = await self.__user_repo.get_user_with_paciente_profile(cmd.id_user, db)
+        user: Users = await self.__user_repo.get_user_with_paciente_profile(cmd.id_user)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -46,10 +47,10 @@ class PacienteProfileHandler:
         
         user.create_paciente(cmd)
 
-        await db.commit()
+        await self._db.commit()
 
-    async def update_perfil_paciente(self,user_id:int, cmd: UpdtPacienteCommand, db: AsyncSession = Depends(get_db)):
-        user: Users = await self.__user_repo.get_user_with_paciente_profile(user_id, db)
+    async def update_perfil_paciente(self,user_id:int, cmd: UpdtPacienteCommand):
+        user: Users = await self.__user_repo.get_user_with_paciente_profile(user_id)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -62,11 +63,11 @@ class PacienteProfileHandler:
         
         user.paciente.update_self(cmd)
 
-        await db.commit()
+        await self._db.commit()
     
 
-    async def delete_paciente(self, cmd: DeletePacienteCmd, db: AsyncSession = Depends(get_db)): 
-        user: Users = await self.__user_repo.get_user_with_paciente_profile(cmd.id_user, db)
+    async def delete_paciente(self, cmd: DeletePacienteCmd): 
+        user: Users = await self.__user_repo.get_user_with_paciente_profile(cmd.id_user)
 
         if user is None:
             raise UserNotFoundError("El usuario no ha sido encontrado", 404)
@@ -78,7 +79,7 @@ class PacienteProfileHandler:
             raise PacienteAlreadyCreated("El usuario enviado no posee un perfil de médico generado. ", 400)
     
         
-        await self.__paciente_repo.delete_paciente(user.paciente, db)
+        await self.__paciente_repo.delete_paciente(user.paciente)
         user.delete_paciente()
 
-        await db.commit()
+        await self._db.commit()
