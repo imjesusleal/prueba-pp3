@@ -96,14 +96,14 @@ class JwtService:
 async def get_current_user(
     token: str = Depends(__AUTH_SCHEME),
     db: AsyncSession = Depends(get_db)
-):
+) -> Users:
     try:
         payload = jwt.decode(token, __SECRET_KEY, algorithms=[__ALGORITHM])
         user_id = payload.get("id_user")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Token inválido")
         user_repo = UserRepository(db)
-        user = await user_repo.get_user_by_id(user_id)
+        user: Users = await user_repo.get_user_by_id(user_id)
         return user
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expirado")

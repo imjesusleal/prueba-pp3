@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from db.db import get_db
+from db.entities.users import Users
 from services.auth_services.jwt_service import get_current_user
 from services.turnos.commands.create.create_turno_cmd import CreateTurnoCmd
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +14,7 @@ class TurnosRouter():
         self.router = APIRouter(prefix="/turnos", tags=["turnos"])
         self.router.post("/create", status_code=201)(self.create)
         
-    async def create(self, cmd: CreateTurnoCmd, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    async def create(self, cmd: CreateTurnoCmd, db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)):
         handler = CreateCmdHandler(db)
         await handler.handle(cmd)
         

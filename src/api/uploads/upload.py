@@ -2,6 +2,7 @@ from pathlib import Path
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile, Response
 
 from db.db import get_db
+from db.entities.users import Users
 from services.auth_services.jwt_service import get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,21 +22,21 @@ class UploadRouter:
 
     async def upload_image(self, file: UploadFile = File(), 
                            db: AsyncSession = Depends(get_db), 
-                           current_user: dict = Depends(get_current_user)):
+                           current_user: Users = Depends(get_current_user)):
 
         if file.content_type not in self.__ALLOWED_CONTENT_TYPES:
            raise HTTPException(status_code=400, detail="Los archivos permitidos son pdfs, jpeg y jpg.")
 
-        if not current_user["id_user"]:
+        if not current_user.id_user:
             raise HTTPException(status_code=400, detail="Se debe enviar el identificador del usuario para guardar una imagen.")
 
 
         handler = UploadHandler(db)
-        res =  await handler.upload_img(current_user["id_user"], file)
+        res =  await handler.upload_img(current_user.id_user, file)
         
         return res
 
-    async def download_profile_img(self, img_name:str = Body(embed=True), db: AsyncSession = Depends(get_db),current_user: dict = Depends(get_current_user)): 
+    async def download_profile_img(self, img_name:str = Body(embed=True), db: AsyncSession = Depends(get_db),current_user: Users = Depends(get_current_user)): 
 
         if img_name.split(".")[1] not in self.__ALLOWED_TYPES:
             raise HTTPException(status_code=400, detail="El archivo enviado no tiene una extensión permitida")

@@ -18,4 +18,10 @@ class CreateTurnoCmd(BaseModel):
         if (self.hora_entrada < datetime.now()):
             raise MalHorarioEnviadoError("La hora de entrada no puede ser menor a la hora actual. ", 400)
         
+        hourDif = self.hora_entrada.hour - self.hora_salida.hour
+        
+        if abs(hourDif) > 2:
+            raise MalHorarioEnviadoError("El horario de las consultas es como máximo de dos horas. ")
+        
+        
         

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.db import get_db
+from db.entities.users import Users
 from services.auth_services.jwt_service import get_current_user
 from services.medicos.commands.get_all.get_all_cmd_handler import GetAllMedicosCmdHandler
 from services.medicos.commands.get_all.get_medicos_cmd import GetAllMedicosCmd
@@ -21,15 +22,15 @@ class MedicosRouter:
         self.router.get("/getTurnos", response_model=list[TurnosMedicosModel], status_code = 200)(self.get_turnos)
 
 
-    async def get_all(self,cmd: GetAllMedicosCmd = Depends(GetAllMedicosCmd), db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)) -> list[GetAllMedicosDto]:
+    async def get_all(self,cmd: GetAllMedicosCmd = Depends(GetAllMedicosCmd), db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)) -> list[GetAllMedicosDto]:
         handler = GetAllMedicosCmdHandler(db)
         return await handler.handle(cmd)
     
-    async def get_medico(self, cmd: GetMedicoCmd = Depends(), db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)) -> GetMedidoDto:
+    async def get_medico(self, cmd: GetMedicoCmd = Depends(), db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)) -> GetMedidoDto:
         handler = GetMedicoHandler(db)
         return await handler.handle(cmd)
     
-    async def get_turnos(self, cmd: GetMedicoCmd = Depends(GetMedicoCmd), db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)) -> list[TurnosMedicosModel]: 
+    async def get_turnos(self, cmd: GetMedicoCmd = Depends(GetMedicoCmd), db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)) -> list[TurnosMedicosModel]: 
         handler = GetTurnosHandler(db) 
         return await handler.handle(cmd)
     

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from db.db import get_db
+from db.entities.users import Users
 from services.auth_services.jwt_service import get_current_user
 from services.especialidades.commands.create_especialidad_cmd import CreateEspecialidadCmd
 from services.especialidades.handlers.create_especialidad_handler import CreateEspecialidadHandler
@@ -14,11 +15,11 @@ class EspecialidadesRouter:
         self.router.get("/getAll", response_model=list[EspecialidadesDto], status_code=200)(self.get_all)
         self.router.post("/create", status_code=201)(self.create)
         
-    async def get_all(self, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)) -> list[EspecialidadesDto]:
+    async def get_all(self, db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)) -> list[EspecialidadesDto]:
         handler = GetAllEspecialidadesHandler(db)
         return await handler.handle()
 
-    async def create(self, cmd: CreateEspecialidadCmd, db: AsyncSession = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    async def create(self, cmd: CreateEspecialidadCmd, db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)):
         handler = CreateEspecialidadHandler(db)
         await handler.handle(cmd)
 
