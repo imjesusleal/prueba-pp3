@@ -7,3 +7,4 @@ from .reviews import *
 from .turnos import * 
 from .user_roles import * 
 from .users import * 
+from .turnos import * 

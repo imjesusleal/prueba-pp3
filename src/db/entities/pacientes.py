@@ -8,6 +8,7 @@ from services.profiles.pacientes.commands.updt_paciente_cmd import UpdtPacienteC
 
 if TYPE_CHECKING:
     from users import Users
+    from turnos import Turnos
 
 class Pacientes(SQLModel, table=True):
     __tablename__ = "pacientes"
@@ -22,7 +23,7 @@ class Pacientes(SQLModel, table=True):
     img_name: str = Field(default=None, nullable=True)
 
     user: "Users"  = Relationship(back_populates="paciente", sa_relationship_kwargs={"uselist": False})
-
+    p_turnos: "Turnos" = Relationship(back_populates="t_paciente", sa_relationship_kwargs={"uselist": True})
 
     def map_to_model(self) -> PacienteProfile:
         return PacienteProfile(

@@ -16,6 +16,8 @@ from db.entities.consultas import Consulta
 from db.entities.documento_identificativo import DocumentoIdentificativo
 from db.entities.reviews import Reviews
 from db.entities.turnos import Turnos
+from db.entities.estado_turnos_opciones import EstadoTurnosOpciones
+from db.entities.estados_turnos import EstadosTurnos
 
 from sqlmodel import SQLModel
 

@@ -1,8 +1,12 @@
+from db.entities import *
+
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from db.seeds.seed_estados_turnos import seed_estados_turnos
 from errors.ierror_interface import IError 
 
 from api.auth.auth import auth_router
@@ -12,16 +16,24 @@ from api.uploads.upload import router as upload_router
 from api.medicos.medicos import router as medicos_router
 from api.especialidades.especialidades import router as especialidades_router
 from api.turnos.turnos import router as turnos_router
+from api.consultas.consultas import router as consultas_router
 
 try: 
     
     load_dotenv()
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        await seed_estados_turnos()
+        yield
+
     app = FastAPI(
         title="Medify API",
         description="API de Medify aplicación para tomar citas médicas y reseñar profesionales de la salud",
-        version="1.0.0"
+        version="1.0.0",
+        lifespan=lifespan
     )
+    
 
     @app.get("/")
     async def root():
@@ -55,6 +67,7 @@ try:
     app.include_router(medicos_router.router, prefix="/api/v1")
     app.include_router(especialidades_router.router, prefix="/api/v1")
     app.include_router(turnos_router.router, prefix="/api/v1")
+    app.include_router(consultas_router.router, prefix="/api/v1")
     
 except IError as ex:
     raise Exception(status_code=ex.http_code,detail= f"{ex.msg}")

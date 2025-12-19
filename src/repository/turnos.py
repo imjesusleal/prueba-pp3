@@ -1,8 +1,19 @@
 from datetime import datetime
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from db.entities.medicos import Medicos
 from db.entities.turnos import Turnos
 from typing import List, Optional
+from sqlalchemy.orm import  joinedload
+
+
+def default_turnos_options():
+    return (
+        joinedload(Turnos.t_medicos)
+            .joinedload(Medicos.m_especialidad),
+        joinedload(Turnos.t_estado),
+        joinedload(Turnos.t_consultas)
+    )
 
 class TurnosRepo:
     
@@ -12,9 +23,17 @@ class TurnosRepo:
     async def get_all_turnos(self) -> List[Turnos]:
         res = await self._db.execute(select(Turnos))
         return res.scalars().all()
+    
+    async def get_all_turnos_pacientes(self, id_paciente:int) -> List[Turnos]:
+        res = await self._db.execute(select(Turnos).filter(Turnos.id_paciente == id_paciente).options(*default_turnos_options()).execution_options(identity_token="no_tracking"))
+        return res.scalars().all()
 
-    async def get_turno(self,id: int) -> Optional[Turnos]:
+    async def get_turno(self,id: int, include_estados: bool = False) -> Optional[Turnos]:
         query = select(Turnos).filter(Turnos.id_turno == id)
+        
+        if include_estados:
+            query = query.options(joinedload(Turnos.t_estado))
+        
         res = await self._db.execute(query)
         return res.scalars().first()
     
@@ -26,6 +45,7 @@ class TurnosRepo:
             
         res = await self._db.execute(query)
         return res.scalar()
+    
     
     async def get_turnos_by_medico(self,id_medico: int, as_no_tracking = False) -> List[Turnos]:
         query = select(Turnos).filter(Turnos.id_medico == id_medico)
