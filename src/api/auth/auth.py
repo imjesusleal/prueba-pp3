@@ -20,6 +20,7 @@ class AuthRouter:
         self.router.post("/register", response_model=dict, status_code=status.HTTP_201_CREATED)(self.register)
         self.router.post("/login", response_model=UserResponse)(self.login)
         self.router.post("/reauthenticate", response_model=UserResponse)(self.reauthenticate)
+        self.router.post('/logout', response_model=dict, status_code=200)(self.logout)
 
     # Endpoints
     async def register(self, user_data: UserRegister, db: AsyncSession = Depends(get_db)):
@@ -35,7 +36,6 @@ class AuthRouter:
         
         json_res = JSONResponse(content=res.model_dump())
 
-        # Setear cookies en ese response
         self.__create_cookies(res, json_res)
 
         return json_res
@@ -48,10 +48,33 @@ class AuthRouter:
         
         json_res = JSONResponse(content=res.model_dump())
 
-        # Setear cookies en ese response
         self.__create_cookies(res, json_res)
 
         return json_res
+    
+    async def logout(self, response: Response):
+        
+        response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        secure=True,
+        samesite="none",
+        domain="localhost",
+        path="/"
+        )
+
+        response.delete_cookie(
+            key="id_user",
+            path="/",
+            httponly=True,
+            secure=True,
+            domain="localhost",
+            samesite="none",
+        )
+        
+        return {"msg": "Logged out"}
+    
+
     
     
     def __create_cookies(self, res: UserResponse, response: Response):

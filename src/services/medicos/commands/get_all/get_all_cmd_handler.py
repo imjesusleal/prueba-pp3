@@ -1,6 +1,3 @@
-
-from fastapi import Depends
-from db.db import get_db
 from db.entities.medicos import Medicos
 from repository.medicos import MedicosRepo
 from services.medicos.commands.get_all.get_medicos_cmd import GetAllMedicosCmd

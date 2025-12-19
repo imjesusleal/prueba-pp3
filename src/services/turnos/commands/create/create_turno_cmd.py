@@ -21,7 +21,7 @@ class CreateTurnoCmd(BaseModel):
         hourDif = self.hora_entrada.hour - self.hora_salida.hour
         
         if abs(hourDif) > 2:
-            raise MalHorarioEnviadoError("El horario de las consultas es como máximo de dos horas. ")
+            raise MalHorarioEnviadoError("El horario de las consultas es como máximo de dos horas. ", 400)
         
         
         

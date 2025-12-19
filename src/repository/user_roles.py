@@ -14,7 +14,6 @@ class UsersRolesRepository:
 
     async def get_all_users_roles(self) -> List[UsersRoles]:
         res = await self._db.execute(select(UsersRoles))
-        #es equivalente a escribir en SQL: SELECT * FROM users_roles/db.execute se consulta a la BD y se espera la respuesta en el 'res'
         return res.scalars().all()#lo devuelve en una lista
 
     async def get_user_role(self,id: int) -> Optional[UsersRoles]:

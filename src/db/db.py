@@ -9,25 +9,21 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-class DbCtx(): 
-    def __init__(self):
-        self.__database_url = DATABASE_URL
-        self.engine = create_async_engine(self.__database_url, echo=True, connect_args = {"driver": "ODBC Driver 17 for SQL Server"})
-        self._sessionmaker = sessionmaker(bind=self.engine, class_=AsyncSession, expire_on_commit=False)
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=True,
+    connect_args={"driver": "ODBC Driver 17 for SQL Server"},
+    pool_size=10,
+    max_overflow=20,
+    future=True,
+)
 
-    @asynccontextmanager
-    async def session(self):
-        async with self._sessionmaker() as session:
-            yield session
-        
-
-    @property
-    def metadata(self):
-        return SQLModel.metadata
-    
-    
-db = DbCtx()
+async_sessionmaker = sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
 async def get_db():
-    async with db.session() as session:
+    async with async_sessionmaker() as session:
         yield session

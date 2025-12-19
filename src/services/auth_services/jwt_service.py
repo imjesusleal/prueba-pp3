@@ -19,6 +19,7 @@ from repository.users import UserRepository
 __SECRET_KEY = os.getenv("SECRET_KEY")
 __ALGORITHM = "HS256"
 __AUTH_SCHEME = OAuth2PasswordBearer(tokenUrl="/auth/login")
+__ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 
 class JwtService:
 

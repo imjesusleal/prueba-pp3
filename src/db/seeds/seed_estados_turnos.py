@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import select
 from db.entities.estado_turnos_opciones import EstadoTurnosOpciones
-from db.db import db
+from db.db import async_sessionmaker
 
 ESTADOS_DEFAULT = [
     {"valor": "PE", "descripcion": "Pendiente", "created_at": datetime.now(), "modified_at":datetime.now()},
@@ -10,7 +10,7 @@ ESTADOS_DEFAULT = [
 ]
 
 async def seed_estados_turnos() -> None:
-    async with db.session() as session:
+    async with async_sessionmaker() as session:
         result = await session.execute(
             select(EstadoTurnosOpciones.valor)
         )

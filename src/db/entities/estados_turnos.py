@@ -32,5 +32,5 @@ class EstadosTurnos(SQLModel, table=True):
     def modificar_estado(self, estado: TurnosOpcionesEnums, clasificacion: int = None):
         self.id_turnos_opciones = estado.value
         self.modified_at = datetime.now()
-        self.clasificacion = clasificacion
+        self.e_turnos.clasificacion = clasificacion
         

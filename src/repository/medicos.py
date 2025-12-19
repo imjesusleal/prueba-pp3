@@ -4,7 +4,10 @@ from db.entities.medicos import Medicos
 from typing import List, Optional
 from sqlalchemy.orm import  joinedload
 
+from db.entities.turnos import Turnos
 from services.medicos.commands.get_all.get_medicos_cmd import GetAllMedicosCmd
+
+
 
 class MedicosRepo:
     
@@ -40,7 +43,7 @@ class MedicosRepo:
             query = query.options(joinedload(Medicos.m_reviews))
             
         if include_turnos:
-            query = query.options(joinedload(Medicos.m_turnos))
+            query = query.options(joinedload(Medicos.m_turnos).joinedload(Turnos.t_estado))
             
         if as_no_track:
             query = query.execution_options(identity_token="no_tracking")

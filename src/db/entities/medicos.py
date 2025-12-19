@@ -16,10 +16,10 @@ class Medicos(SQLModel, table=True):
 
     id_medico: int = Field(default=None, primary_key=True)
     id_user: int = Field(unique=True, foreign_key="users.id_user", ondelete="CASCADE")
-    documento_identificacion: int = Field(unique=True, foreign_key="documento_identificativo.id_documento")
+    documento_identificacion: int = Field(foreign_key="documento_identificativo.id_documento", index=True, unique=False)
     nombre: str = Field(max_length=50)
     apellido: str = Field(max_length=50)
-    especialidad: int = Field(unique=True, foreign_key="especialidades.id_especialidad")
+    especialidad: int = Field(foreign_key="especialidades.id_especialidad", index=True, unique=False)
     matricula: str = Field(max_length=200, unique=True)
     create_at: datetime | None = Field(default=None)
     modified_at: datetime | None = Field(default=None)

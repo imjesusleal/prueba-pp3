@@ -34,7 +34,7 @@ class MedicosProfileRouter:
             raise WrongJsonToken("El token enviado no posee las especificaciones técnicas correctas. ", 400)
 
         handler = MedicoProfileHandler(db)
-        await handler.update_perfil_medico(current_user["id_user"], cmd)
+        await handler.update_perfil_medico(current_user.id_user, cmd)
 
     async def delete_medico(self, cmd: DeleteMedicoCmd, db: AsyncSession = Depends(get_db), current_user: Users = Depends(get_current_user)):
         handler = MedicoProfileHandler(db)

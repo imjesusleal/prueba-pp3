@@ -32,8 +32,9 @@ class GetMedicoHandler():
         turnos_pendientes = 0
         
         for i in medico_data.m_turnos:
-            if i.hora_entrada > datetime.now():
+            if i.t_estado.id_turnos_opciones == 2:
                 turnos_pendientes += 1
+
 
 
         return MedicosMapper.map_to_dto(medico_data, rating, reviews, atenciones, turnos_pendientes)
